@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken')
 
 const { decodedToken } = require('./decodedToken')
 
-const UserSchema = require('./schemas/User')
+const UserSchema = require('./User')
 
 const typeDefs = gql`
   type User {
