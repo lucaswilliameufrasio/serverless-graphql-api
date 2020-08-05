@@ -53,6 +53,7 @@ const resolvers = {
       return UserSchema.find().populate()
     }
   },
+
   Mutation: {
     signupUser: async (root, args, { UserSchema }, info) => {
       const {
