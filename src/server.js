@@ -6,6 +6,8 @@ const { gql } = require('apollo-server-lambda')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
+const { getConnection } = require('./dbconnection')
+
 const { decodedToken } = require('./decodedToken')
 
 const UserSchema = require('./User')
@@ -47,21 +49,26 @@ const typeDefs = gql`
 const resolvers = {
   Query: {
     hello: () => "Hi, i'm @lucaswilliameufrasio",
-    users: async (root, args, { UserSchema, req }, info) => {
+    users: async (root, args, { dbConnection, req }, info) => {
       const decoded = decodedToken(req)
 
-      return UserSchema.find().populate()
+      const userSchema = UserSchema(dbConnection)
+
+      return userSchema.find().populate()
     }
   },
 
   Mutation: {
-    signupUser: async (root, args, { UserSchema }, info) => {
+    signupUser: async (root, args, { dbConnection }, info) => {
+      const userSchema = UserSchema(dbConnection)
+
       const {
         data: { email, name, password }
       } = args
 
       const hashedPassword = bcrypt.hashSync(password, 3)
-      const newUser = await UserSchema.create({
+
+      const newUser = await userSchema.create({
         email,
         name,
         password: hashedPassword
@@ -70,12 +77,14 @@ const resolvers = {
       return { token: jwt.sign(newUser.email, 'supersecret') }
     },
 
-    loginUser: async (root, args, { UserSchema }, info) => {
+    loginUser: async (root, args, { dbConnection }, info) => {
+      const userSchema = UserSchema(dbConnection)
+
       const {
         data: { email, password }
       } = args
 
-      const theUser = await UserSchema.findOne({ email })
+      const theUser = await userSchema.findOne({ email })
 
       if (!theUser) throw new Error('Unable to Login')
       const isMatch = bcrypt.compareSync(password, theUser.password)
@@ -91,10 +100,14 @@ function createLambdaServer() {
   return new ApolloServerLambda({
     typeDefs,
     resolvers,
-    context: (req) => ({
-      UserSchema,
-      req
-    }),
+    context: async (req) => {
+      const dbConnection = await getConnection()
+
+      return {
+        dbConnection,
+        req
+      }
+    },
     introspection: true,
     playground: true
   })
@@ -104,10 +117,14 @@ function createLocalServer() {
   return new ApolloServer({
     typeDefs,
     resolvers,
-    context: (req) => ({
-      UserSchema,
-      req
-    }),
+    context: async (req) => {
+      const dbConnection = await getConnection()
+
+      return {
+        dbConnection,
+        req
+      }
+    },
     introspection: true,
     playground: true
   })

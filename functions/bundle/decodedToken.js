@@ -1,7 +1,9 @@
 const jwt = require('jsonwebtoken')
 
 const decodedToken = (req, requireAuth = true) => {
-  const header = !!req.req ? req.req.headers.authorization : req.event.headers.authorization;
+  const header = !!req.req
+    ? req.req.headers.authorization
+    : req.event.headers.authorization
 
   if (header) {
     const token = header.replace('Bearer ', '')

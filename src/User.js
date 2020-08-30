@@ -17,4 +17,8 @@ const UserSchema = new mongoose.Schema({
   }
 })
 
-module.exports = mongoose.model('User', UserSchema)
+const collectionName = 'user'
+
+const User = (conn) => conn.model(collectionName, UserSchema)
+
+module.exports = User
