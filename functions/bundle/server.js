@@ -66,8 +66,13 @@ const resolvers = {
         data: { email, name, password }
       } = args
 
-      const hashedPassword = bcrypt.hashSync(password, 3)
+      const user = userSchema.findOne({ email })
 
+      if (user) {
+        throw new Error('Email in use')
+      }
+
+      const hashedPassword = bcrypt.hashSync(password, 3)
 
       const newUser = await userSchema.create({
         email,
