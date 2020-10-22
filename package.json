@@ -8,7 +8,7 @@
   "scripts": {
     "start": "nodemon",
     "dev": "yarn bundle && npx netlify-cli dev",
-    "bundle": "cpx src/**/* functions/bundle",
+    "bundle": "cpx 'src/**/*' functions/bundle",
     "prettier-format": "prettier --config .prettierrc 'src/**/*.js' --write"
   },
   "husky": {
